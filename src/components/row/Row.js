@@ -4,7 +4,8 @@ import './Row.scss';
 import YouTube from 'react-youtube';
 import movieTrailer from 'movie-trailer';
 
-const base_url = 'https://image.tmdb.org/t/p/original/';
+const base_url_small = 'https://image.tmdb.org/t/p/w185/';
+const base_url_original = 'https://image.tmdb.org/t/p/original/';
 
 function Row({ title, fetchUrl, isLargeRow }) {
     const [movies, setMovies] = useState([]);
@@ -16,8 +17,12 @@ function Row({ title, fetchUrl, isLargeRow }) {
             setMovies(request.data.results)
             return request;
         }
+
+
+
         fetchData();
     }, [fetchUrl])
+
 
     const opts = {
         height: "390",
@@ -31,35 +36,30 @@ function Row({ title, fetchUrl, isLargeRow }) {
         if (trailerUrl) {
             setTrailerUrl('');
         } else {
-            console.log(movie.name)
             movieTrailer(movie.name || '')
-            .then(url => {
-                console.log(url)
-
-                const urlParams = new URLSearchParams(new URL(url).search);
-                setTrailerUrl(urlParams.get('v'));
-            }).catch(err => console.error(err))
+                .then(url => {
+                    const urlParams = new URLSearchParams(new URL(url).search);
+                    setTrailerUrl(urlParams.get('v'));
+                }).catch(err => console.error(err))
         }
     }
-
     return (
         <div className="row">
             <h2 className="row__title">{title}</h2>
             <div className="row__posters">
-
                 {
                     movies.map(movie => (
-                        movie &&
+                        movie?.poster_path &&
                         <img
                             onClick={() => handleClick(movie)}
                             key={movie.id}
-                            className={`row__poster ${isLargeRow && 'row__posterLarge'}`}
-                            src={`${base_url}${isLargeRow ? movie.poster_path : movie.backdrop_path}`} alt={movie.name} />
+                            className={`row__poster ${isLargeRow ? 'row__posterLarge' : ''}`}
+                            src={`${base_url_small}${isLargeRow ? movie.poster_path : movie.backdrop_path}`} alt={movie.name} />
                     ))
                 }
             </div>
             {trailerUrl && <YouTube videoId={trailerUrl} opts={opts} />}
-            
+
         </div>
     )
 }
